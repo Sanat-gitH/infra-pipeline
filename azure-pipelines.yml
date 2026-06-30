@@ -17,7 +17,7 @@ stages:
         terraformVersion: 'latest'
 
 
-- stage: stage3
+- stage: stage2
   displayName: terraform_init
   jobs:
   - job: init
@@ -35,7 +35,7 @@ stages:
 
 
 
-- stage: stage4
+- stage: stage3
   displayName: code_scan
   jobs:
   - job: tfsec
@@ -45,7 +45,7 @@ stages:
         version: 'v1.26.0'
         debug: true
 
-- stage: stage5
+- stage: stage4
   displayName: terraform_plan
   jobs:
   - job: plan
@@ -57,7 +57,7 @@ stages:
         environmentServiceNameAzureRM: 'Service_connection_infra'
         environmentAzureRmOverrideSubscriptionID: '38840de6-dd80-4026-aeb6-0afb4905c320'
 
-- stage: stage6
+- stage: stage5
   displayName: terraform_apply
   jobs:
   - job: apply
