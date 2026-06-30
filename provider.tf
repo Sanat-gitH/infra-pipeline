@@ -1,8 +1,8 @@
 terraform {
     backend "azurerm" {
-        resource_group_name = "duapp"
-        storage_account_name = "duappstg"
-        container_name = "containerdu"
+        resource_group_name = "infra-rg"
+        storage_account_name = "infrastg1"
+        container_name = "containerinfra"
         key = "infra-pipeline.terraform.tfstate"
     }
 
