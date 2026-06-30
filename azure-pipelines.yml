@@ -1,19 +1,77 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+name: infra_pipeline
 
-trigger:
-- main
+trigger: none
 
 pool:
-  vmImage: ubuntu-latest
+  name: Default
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+stages:
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- stage: stage1
+  displayName: terraform_installer
+  jobs:
+  - job: install
+    steps:
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: 'latest'
+
+- stage: stage2
+  displayName: terraform_init
+  jobs:
+  - job: init
+    steps:
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        backendServiceArm: 'Service_connection_infra'
+        backendAzureRmOverrideSubscriptionID: '38840de6-dd80-4026-aeb6-0afb4905c320'
+        backendAzureRmResourceGroupName: 'infra-rg'
+        backendAzureRmStorageAccountName: 'infrastg1'
+        backendAzureRmContainerName: 'containerinfra'
+        backendAzureRmKey: 'infra-pipeline.terraform.tfstate'
+
+- stage: stage3
+  displayName: terraform_validate
+  jobs:
+  - job: validate
+    steps:
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'validate'
+
+- stage: stage4
+  displayName: code_scan
+  jobs:
+  - job: tfsec
+    steps:
+    - task: tfsec@1
+      inputs:
+        version: 'v1.26.0'
+        debug: true
+
+- stage: stage5
+  displayName: terraform_plan
+  jobs:
+  - job: plan
+    steps:
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'plan'
+        environmentServiceNameAzureRM: 'Service_connection_infra'
+        environmentAzureRmOverrideSubscriptionID: '38840de6-dd80-4026-aeb6-0afb4905c320'
+
+- stage: stage6
+  displayName: terraform_apply
+  jobs:
+  - job: apply
+    steps:
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'apply'
+        environmentServiceNameAzureRM: 'Service_connection_infra'
+        environmentAzureRmOverrideSubscriptionID: '38840de6-dd80-4026-aeb6-0afb4905c320'
