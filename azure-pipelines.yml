@@ -50,21 +50,46 @@ stages:
   jobs:
   - job: plan
     steps:
+    - checkout: self
+
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        backendServiceArm: 'Service_connection_infra'
+        backendAzureRmResourceGroupName: 'infra-rg'
+        backendAzureRmStorageAccountName: 'infrastg1'
+        backendAzureRmContainerName: 'containerinfra'
+        backendAzureRmKey: 'infra-pipeline.terraform.tfstate'
+
     - task: TerraformTask@5
       inputs:
         provider: 'azurerm'
         command: 'plan'
         environmentServiceNameAzureRM: 'Service_connection_infra'
-        environmentAzureRmOverrideSubscriptionID: '38840de6-dd80-4026-aeb6-0afb4905c320'
 
 - stage: stage5
   displayName: terraform_apply
   jobs:
   - job: apply
     steps:
+    - checkout: self
+
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        backendServiceArm: 'Service_connection_infra'
+        backendAzureRmOverrideSubscriptionID: '38840de6-dd80-4026-aeb6-0afb4905c320'
+        backendAzureRmResourceGroupName: 'infra-rg'
+        backendAzureRmStorageAccountName: 'infrastg1'
+        backendAzureRmContainerName: 'containerinfra'
+        backendAzureRmKey: 'infra-pipeline.terraform.tfstate'
+
     - task: TerraformTask@5
       inputs:
         provider: 'azurerm'
         command: 'apply'
         environmentServiceNameAzureRM: 'Service_connection_infra'
         environmentAzureRmOverrideSubscriptionID: '38840de6-dd80-4026-aeb6-0afb4905c320'
+        commandOptions: '-auto-approve'
